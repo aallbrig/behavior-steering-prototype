@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - unity/flappy-bird-microgame
+          - unity/behavior-steering-prototype
     steps:
       - uses: actions/cache@v2
         with:
@@ -36,7 +36,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - unity/flappy-bird-microgame
+          - unity/behavior-steering-prototype
         testMode:
           - playmode
           - editmode
@@ -70,7 +70,7 @@ jobs:
       fail-fast: false
       matrix:
         projectPath:
-          - unity/flappy-bird-microgame
+          - unity/behavior-steering-prototype
         targetPlatform:
           - WebGL
 
