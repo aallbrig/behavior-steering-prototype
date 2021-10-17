@@ -136,6 +136,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7257013996115847784}
+  - component: {fileID: 3368638577688443541}
   m_Layer: 0
   m_Name: BT Bot
   m_TagString: Untagged
@@ -158,6 +159,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3368638577688443541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7257013996115847787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e695d135ad942bea6e724dd0435b731, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _headRef: {fileID: 460009952319918799}
 --- !u!1 &8286158263744016690
 GameObject:
   m_ObjectHideFlags: 0
