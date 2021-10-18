@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Tests.EditMode
 {
     // aka "BT Bot"
-    public class BehaviorTestBot
+    public class BehaviorTestBotBehavior
     {
         [Test]
         public void CanSetHeadMaterial()
@@ -19,5 +19,20 @@ namespace Tests.EditMode
 
             Assert.AreEqual(testMaterial, sut.HeadMaterial);
         }
+
+        [Test]
+        public void CanBeMovedToDestination()
+        {
+            var prefab = Resources.Load<GameObject>("Prefabs/BT Bot");
+            var gameObject = Object.Instantiate(prefab);
+            var sut = gameObject.GetComponent<BTBot>();
+            var position = new Vector3(0, 0, 10);
+            
+            sut.SetDestination(position);
+
+            Assert.IsNull(sut);
+        }
     }
+
+    public class PlayerBehavior {}
 }

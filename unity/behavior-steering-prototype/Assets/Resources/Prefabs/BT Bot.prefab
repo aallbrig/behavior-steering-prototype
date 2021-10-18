@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8980233457286460821}
   - component: {fileID: 1265989904081363403}
   - component: {fileID: 5173266503739943048}
-  - component: {fileID: 5138019745651005159}
   m_Layer: 0
   m_Name: Head
   m_TagString: Untagged
@@ -82,19 +81,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5138019745651005159
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 460009952319918799}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5652128059310766247
 GameObject:
   m_ObjectHideFlags: 0
@@ -137,6 +123,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7257013996115847784}
   - component: {fileID: 3368638577688443541}
+  - component: {fileID: 7161401171498159466}
   m_Layer: 0
   m_Name: BT Bot
   m_TagString: Untagged
@@ -172,6 +159,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _headRef: {fileID: 460009952319918799}
+--- !u!195 &7161401171498159466
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7257013996115847787}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &8286158263744016690
 GameObject:
   m_ObjectHideFlags: 0
