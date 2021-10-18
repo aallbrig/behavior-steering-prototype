@@ -30,7 +30,7 @@ namespace Tests.EditMode
             
             sut.SetDestination(position);
 
-            Assert.IsNull(sut);
+            Assert.NotNull(sut);
         }
     }
 

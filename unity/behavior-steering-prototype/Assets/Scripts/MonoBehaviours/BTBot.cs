@@ -22,6 +22,7 @@ namespace MonoBehaviours
 
         public void SetDestination(Vector3 position)
         {
+            if (_navMeshAgent == null) return;
             _navMeshAgent.SetDestination(position);
         }
 
