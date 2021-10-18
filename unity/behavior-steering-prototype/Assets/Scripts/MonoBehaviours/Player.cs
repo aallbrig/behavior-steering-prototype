@@ -5,8 +5,8 @@ namespace MonoBehaviours
     [RequireComponent(typeof(BTBot))]
     public class Player : MonoBehaviour
     {
-        [SerializeField]
-        private Material playerControlledMaterial;
+        [SerializeField] private Material playerControlledMaterial;
+
         private BTBot _btBot;
 
         private void Start()

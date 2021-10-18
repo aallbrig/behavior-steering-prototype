@@ -9,7 +9,6 @@ namespace Tests.EditMode
     {
         [Test]
         public void CanSetHeadMaterial()
-        
         {
             var prefab = Resources.Load<GameObject>("Prefabs/BT Bot");
             var gameObject = Object.Instantiate(prefab);
