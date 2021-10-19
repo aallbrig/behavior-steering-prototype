@@ -115,6 +115,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [tests, builds]
     steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+
       - uses: actions/download-artifact@v2
         with:
           name: Build-WebGL
