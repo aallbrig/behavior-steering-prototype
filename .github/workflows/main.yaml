@@ -45,13 +45,6 @@ jobs:
         with:
           lfs: true
 
-      - uses: actions/cache@v2
-        with:
-          path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}
-          restore-keys: |
-            Library-
-
       - uses: game-ci/unity-test-runner@v2
         id: tests
         env:
@@ -88,17 +81,21 @@ jobs:
 
       - uses: actions/cache@v2
         with:
-          path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}
-          restore-keys: |
-            Library-
-
-      - uses: actions/cache@v2
-        with:
           path: build/${{ matrix.targetPlatform }}
           key: Build-${{ matrix.targetPlatform }}
           restore-keys: |
             Build-
+
+      - uses: game-ci/unity-builder@v2
+        id: builds
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          projectPath: ${{ matrix.projectPath }}
+          buildName: ${{ matrix.targetPlatform }}
+          buildsPath: build
+          allowDirtyBuild: true
 
       - uses: actions/upload-artifact@v2
         with:
@@ -111,13 +108,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [tests, builds]
     steps:
-      - uses: actions/cache@v2
-        with:
-          path: build/${{ matrix.targetPlatform }}
-          key: Build-${{ matrix.targetPlatform }}
-          restore-keys: |
-            Build-
-
       - uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           branch: main
