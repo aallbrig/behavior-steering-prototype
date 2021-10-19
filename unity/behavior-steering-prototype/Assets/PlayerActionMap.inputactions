@@ -1,14 +1,22 @@
 {
-    "name": "PlayerActions",
+    "name": "PlayerActionMap",
     "maps": [
         {
             "name": "Player",
-            "id": "2de5901c-83f5-44d9-91dd-751f7e2708bd",
+            "id": "0e7f9974-dfe9-40c3-84c9-0804c88a79f1",
             "actions": [
                 {
-                    "name": "ExecuteAction",
-                    "type": "Value",
-                    "id": "774e8348-b138-48b1-83d3-6acf32ff3d47",
+                    "name": "Interaction",
+                    "type": "Button",
+                    "id": "fac2620a-75d2-4ccb-93df-82c3de2283d2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Position",
+                    "type": "PassThrough",
+                    "id": "3ee9735e-ff0a-45b0-b91f-3a6fddc274fe",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": ""
@@ -17,23 +25,23 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "da1fed77-6734-4116-bf02-51fafcaeb74c",
-                    "path": "<Mouse>/press",
+                    "id": "988a4264-8869-45ac-9ae6-8d1f133fe458",
+                    "path": "<Pointer>/press",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ExecuteAction",
+                    "action": "Interaction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "fd984fe6-f149-42a4-8989-6ae09ed089b0",
-                    "path": "<Touchscreen>/press",
+                    "id": "f18e8218-e003-42cf-995a-da47b45c7905",
+                    "path": "<Pointer>/position",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ExecuteAction",
+                    "action": "Position",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
