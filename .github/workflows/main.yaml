@@ -93,10 +93,30 @@ jobs:
           restore-keys: |
             Library-
 
+      - uses: actions/cache@v2
+        with:
+          path: build/${{ matrix.targetPlatform }}
+          key: Build-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Build-
+
       - uses: actions/upload-artifact@v2
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
+
+  deploys:
+    name: Deploys WebGL to Github Pages
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [tests, builds]
+    steps:
+      - uses: actions/cache@v2
+        with:
+          path: build/${{ matrix.targetPlatform }}
+          key: Build-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Build-
 
       - uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
