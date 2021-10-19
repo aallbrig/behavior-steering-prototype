@@ -109,9 +109,19 @@ jobs:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
 
+  deploys:
+    name: Deploys WebGL to Github Pages
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [tests, builds]
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: Build-WebGL
+          path: build/WebGL
+
       - uses: JamesIves/github-pages-deploy-action@4.1.5
-        if: ${{ matrix.targetPlatform }} == 'WebGL'
         with:
           branch: main
-          folder: build/${{ matrix.targetPlatform }}
+          folder: build/WebGL
           target-folder: docs
