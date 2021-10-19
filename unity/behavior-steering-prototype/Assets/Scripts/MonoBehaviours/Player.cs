@@ -10,10 +10,12 @@ namespace MonoBehaviours
 
         private BTBot _btBot;
         private PlayerActionMap _playerActions;
+        private Camera _camera;
 
         private void Start()
         {
             _btBot = GetComponent<BTBot>();
+            _camera = Camera.main;
             SetPlayerControlledMaterial(playerControlledMaterial);
             BindControls();
         }
@@ -34,7 +36,16 @@ namespace MonoBehaviours
 
         private void HandleInteraction(InputAction.CallbackContext obj)
         {
-            Debug.Log("Interaction at position " + _playerActions.Player.Position.ReadValue<Vector2>());
+            var position = _playerActions.Player.Position.ReadValue<Vector2>();
+            Debug.Log("Interaction at position " + position);
+            // HACK: initial tap/click is 0,0,0
+            if (position == Vector2.zero) return;
+            var ray = _camera.ScreenPointToRay(position);
+            if (Physics.Raycast(ray, out var hit))
+            {
+                Debug.Log("Hit: " + hit);
+                _btBot.SetDestination(hit.point);
+            }
         }
     }
 }
