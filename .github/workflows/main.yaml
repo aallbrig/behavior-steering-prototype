@@ -45,6 +45,13 @@ jobs:
         with:
           lfs: true
 
+      - uses: actions/cache@v2
+        with:
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}
+          restore-keys: |
+            Library-
+
       - uses: game-ci/unity-test-runner@v2
         id: tests
         env:
@@ -81,10 +88,11 @@ jobs:
 
       - uses: actions/cache@v2
         with:
-          path: build/${{ matrix.targetPlatform }}
-          key: Build-${{ matrix.targetPlatform }}
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath}}/${{ matrix.targetPlatform }}
           restore-keys: |
-            Build-
+            Library-${{ matrix.projectPath }}-
+            Library-
 
       - uses: game-ci/unity-builder@v2
         id: builds
@@ -94,7 +102,6 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           projectPath: ${{ matrix.projectPath }}
           buildName: ${{ matrix.targetPlatform }}
-          buildsPath: build
           allowDirtyBuild: true
 
       - uses: actions/upload-artifact@v2
@@ -102,14 +109,9 @@ jobs:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
 
-  deploys:
-    name: Deploys WebGL to Github Pages
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    needs: [tests, builds]
-    steps:
       - uses: JamesIves/github-pages-deploy-action@4.1.5
+        if: ${{ matrix.targetPlatform }} == 'WebGL'
         with:
           branch: main
-          folder: build/WebGL
+          folder: build/${{ matrix.targetPlatform }}
           target-folder: docs
