@@ -93,7 +93,15 @@ jobs:
           restore-keys: |
             Library-
 
+      - uses: actions/cache@v2
+        with:
+          path: build/${{ matrix.targetPlatform }}
+          key: Build-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Build-
+
       - uses: game-ci/unity-builder@v2
+        id: builds
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
