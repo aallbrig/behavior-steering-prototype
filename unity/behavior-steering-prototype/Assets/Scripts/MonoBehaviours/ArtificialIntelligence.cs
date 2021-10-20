@@ -34,17 +34,26 @@ namespace MonoBehaviours
         private float _detectRange = 10.0f;
         private IEnumerator _idleBehaviorCoroutine;
         private readonly float _idleBehaviorInSeconds = 1.0f + Random.value * 5.0f;
+        private float _wanderRadius = 4.0f;
         public IdleState(Material stateMaterial) : base(stateMaterial) {}
+
         public override void Start(ArtificialIntelligence context)
         {
             base.Start(context);
             _idleBehaviorCoroutine = IdleBehavior(context);
             context.StartCoroutine(_idleBehaviorCoroutine);
         }
+
         private IEnumerator IdleBehavior(ArtificialIntelligence context)
         {
+            var randomWanderDirection = Random.insideUnitCircle * _wanderRadius;
+            var destination = context.transform.position + new Vector3(randomWanderDirection.x, 0, randomWanderDirection.y);
+
+            context.UpdateDestination(destination);
+
             yield return new WaitForSeconds(_idleBehaviorInSeconds);
         }
+
         public override void Stop(ArtificialIntelligence context)
         {
             base.Stop(context);
@@ -52,24 +61,43 @@ namespace MonoBehaviours
         }
         public override void Update(ArtificialIntelligence context)
         {
-            var player = DetectPlayer();
+            var player = DetectPlayer(context);
             if (player != null)
             {
+                Debug.Log("Player detected!");
                 context._chasingState.Target = player;
                 context.SetState(context._chasingState);
             }
             // else if (TimeToWander()) current time is >= the amount of time to wait since last decided to wander
         }
-        private GameObject DetectPlayer() => null;
+
+        public override void OnDrawGizmos(ArtificialIntelligence context)
+        {
+            base.OnDrawGizmos(context);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(context.gameObject.transform.position, _detectRange);
+        }
+
+        private GameObject DetectPlayer(ArtificialIntelligence context)
+        {
+            GameObject player = null;
+            // Draw circle around gameObject. If player detected, return
+            var hitColliders = Physics.OverlapSphere(context.gameObject.transform.position, _detectRange);
+            foreach (var hitCollider in hitColliders)
+            {
+                var hitColliderGameObject = hitCollider.gameObject;
+                player = hitColliderGameObject.GetComponent<Player>()?.gameObject;
+                if (player != null) break;
+            }
+
+            return player;
+        }
     }
 
     public class ChaseState : AiState
     {
         private IEnumerator _chaseBehaviorCoroutine;
         private readonly float _chaseUpdateWaitInSeconds = 2.0f;
-        private float _inCombatRange = 2.0f;
-
-        private float _outOfRange = 10.0f;
         public ChaseState(Material stateMaterial) : base(stateMaterial) {}
 
         public GameObject Target { get; set; }
@@ -107,7 +135,6 @@ namespace MonoBehaviours
 
     public class CombatCloseState : AiState
     {
-        private float _outOfRange = 10.0f;
         public CombatCloseState(Material stateMaterial) : base(stateMaterial) {}
         public override void Update(ArtificialIntelligence context)
         {
@@ -147,7 +174,7 @@ namespace MonoBehaviours
             _deadState = new DeadState(deadMaterial);
             SetState(_idleState);
         }
-        private void Update() => CurrentAiState.Update(this);
+        private void Update() => CurrentAiState?.Update(this);
         private void OnDrawGizmos() => CurrentAiState?.OnDrawGizmos(this);
 
         public AiState CurrentAiState { get; private set; }
