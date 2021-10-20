@@ -1,10 +1,16 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace MonoBehaviours
 {
+    public interface AiStateContext
+    {
+        public AiState CurrentAiState { get; }
+
+        public void SetState(AiState nextAiState);
+    }
+
     public abstract class AiState
     {
         private readonly Material _stateMaterial;
@@ -118,27 +124,20 @@ namespace MonoBehaviours
         }
     }
 
-    public interface AiStateContext
-    {
-        public AiState CurrentAiState { get; }
-
-        public void SetState(AiState nextAiState);
-    }
-
     // FSM context
     public class ArtificialIntelligence : MonoBehaviour, AiStateContext
     {
+        public ChaseState _chasingState;
+        public CombatCloseState _closeCombatState;
+        public DeadState _deadState;
+        public IdleState _idleState;
+
         [SerializeField] private Material idleMaterial;
         [SerializeField] private Material chaseMaterial;
         [SerializeField] private Material closeCombatMaterial;
         [SerializeField] private Material deadMaterial;
 
         private BTBot _btBot;
-        public ChaseState _chasingState;
-        public CombatCloseState _closeCombatState;
-        public DeadState _deadState;
-
-        public IdleState _idleState;
         private void Start()
         {
             _btBot = GetComponent<BTBot>();
@@ -149,7 +148,7 @@ namespace MonoBehaviours
             SetState(_idleState);
         }
         private void Update() => CurrentAiState.Update(this);
-        private void OnDrawGizmos() => CurrentAiState.OnDrawGizmos(this);
+        private void OnDrawGizmos() => CurrentAiState?.OnDrawGizmos(this);
 
         public AiState CurrentAiState { get; private set; }
 
