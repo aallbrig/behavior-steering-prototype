@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace MonoBehaviours
 {
@@ -15,6 +17,10 @@ namespace MonoBehaviours
             // Do nothing
         }
         public abstract void Update(ArtificialIntelligence context);
+        public virtual void OnDrawGizmos(ArtificialIntelligence context)
+        {
+            // Do nothing
+        }
     }
 
     public class IdleState : AiState
@@ -142,7 +148,8 @@ namespace MonoBehaviours
             _deadState = new DeadState(deadMaterial);
             SetState(_idleState);
         }
-        public void Update() => CurrentAiState.Update(this);
+        private void Update() => CurrentAiState.Update(this);
+        private void OnDrawGizmos() => CurrentAiState.OnDrawGizmos(this);
 
         public AiState CurrentAiState { get; private set; }
 
