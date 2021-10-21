@@ -32,9 +32,9 @@ namespace MonoBehaviours
     public class IdleState : AiState
     {
         private readonly float _detectRange = 7.0f;
+        private readonly float _wanderRadius = 4.0f;
         private IEnumerator _idleBehaviorCoroutine;
         private float _idleBehaviorInSeconds = ComputeIdleWaitTime();
-        private readonly float _wanderRadius = 4.0f;
         private Vector3 _wanderTarget;
         public IdleState(Material stateMaterial) : base(stateMaterial) {}
         private static float ComputeIdleWaitTime() => 1.0f + Random.value * 5.0f;
@@ -72,6 +72,7 @@ namespace MonoBehaviours
             {
                 Debug.Log("Player detected!");
                 context._chasingState.Target = player;
+                context._chasingState.ChaseRange = _detectRange;
                 context.SetState(context._chasingState);
             }
         }
@@ -111,9 +112,20 @@ namespace MonoBehaviours
     public class ChaseState : AiState
     {
         private readonly float _chaseUpdateWaitInSeconds = 1.5f;
+        private readonly float _changeRangeBuffer = 1.0f;
         private IEnumerator _chaseBehaviorCoroutine;
+        private float _chaseRange = 3.0f;
+        private readonly float _chaseRangeMin = 1.0f;
         private Vector3 _chaseTarget;
+        private readonly float _closeRange = 2.0f;
+
         public ChaseState(Material stateMaterial) : base(stateMaterial) {}
+
+        public float ChaseRange
+        {
+            get => _chaseRange;
+            set => _chaseRange = _changeRangeBuffer + value >= _chaseRangeMin ? value : _chaseRangeMin;
+        }
 
         // Promote up to abstract class? 🤔
         public GameObject Target { get; set; }
@@ -131,8 +143,8 @@ namespace MonoBehaviours
         {
             // Is _target null? setstate(Idle)
             if (Target == null) context.SetState(context._idleState);
-            else if (TargetOutOfChaseRange()) context.SetState(context._idleState);
-            else if (TargetWithinCloseFollowRange()) context.SetState(context._closeFollowState);
+            else if (TargetOutOfChaseRange(context)) context.SetState(context._idleState);
+            else if (TargetWithinCloseFollowRange(context)) context.SetState(context._closeFollowState);
         }
 
         public override void OnDrawGizmos(ArtificialIntelligence context)
@@ -140,18 +152,41 @@ namespace MonoBehaviours
             base.OnDrawGizmos(context);
 
             var position = context.gameObject.transform.position;
+
+            Gizmos.color = Color.red;
             Gizmos.DrawRay(position + Vector3.up, _chaseTarget - (position + Vector3.up));
+            // Within close follow range
+            Gizmos.DrawWireSphere(position, _closeRange);
+
+            // Out of range
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(position, _chaseRange);
         }
 
-        private bool TargetOutOfChaseRange() =>
+        private bool TargetOutOfChaseRange(ArtificialIntelligence context)
+        {
             // Get the length of a ray between target and self.
             // Return if that length is greater than _closeFollowRange
-            false;
+            var offset = Target.transform.position - context.transform.position;
+            var squareLength = offset.sqrMagnitude;
 
-        private bool TargetWithinCloseFollowRange() =>
+            // multiple _chaseRange to compare like terms
+            return squareLength > _chaseRange * _chaseRange;
+        }
+
+        private bool TargetWithinCloseFollowRange(ArtificialIntelligence context)
+        {
+
             // Get the length of a ray between target and self.
             // Return if that length is greater than _closeFollowRange
-            false;
+            // Get the length of a ray between target and self.
+            // Return if that length is greater than _closeFollowRange
+            var offset = Target.transform.position - context.transform.position;
+            var squareLength = offset.sqrMagnitude;
+
+            // multiple _chaseRange to compare like terms
+            return squareLength < _closeRange * _closeRange;
+        }
 
         private IEnumerator ChaseBehavior(ArtificialIntelligence context)
         {
