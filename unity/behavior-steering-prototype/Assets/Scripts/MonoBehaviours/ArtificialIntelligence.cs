@@ -1,6 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace MonoBehaviours
 {
@@ -31,11 +31,13 @@ namespace MonoBehaviours
 
     public class IdleState : AiState
     {
-        private float _detectRange = 10.0f;
+        private readonly float _detectRange = 7.0f;
         private IEnumerator _idleBehaviorCoroutine;
-        private readonly float _idleBehaviorInSeconds = 1.0f + Random.value * 5.0f;
-        private float _wanderRadius = 4.0f;
+        private float _idleBehaviorInSeconds = ComputeIdleWaitTime();
+        private readonly float _wanderRadius = 4.0f;
+        private Vector3 _wanderTarget;
         public IdleState(Material stateMaterial) : base(stateMaterial) {}
+        private static float ComputeIdleWaitTime() => 1.0f + Random.value * 5.0f;
 
         public override void Start(ArtificialIntelligence context)
         {
@@ -48,11 +50,12 @@ namespace MonoBehaviours
         {
             while (true)
             {
-                var randomWanderDirection = Random.insideUnitCircle * _wanderRadius;
-                var destination = context.transform.position + new Vector3(randomWanderDirection.x, 0, randomWanderDirection.y);
+                var randomWanderInterest = Random.insideUnitCircle * _wanderRadius;
+                _wanderTarget = context.transform.position + new Vector3(randomWanderInterest.x, 0, randomWanderInterest.y);
 
-                context.UpdateDestination(destination);
+                context.UpdateDestination(_wanderTarget);
 
+                _idleBehaviorInSeconds = ComputeIdleWaitTime();
                 yield return new WaitForSeconds(_idleBehaviorInSeconds);
             }
         }
@@ -71,14 +74,22 @@ namespace MonoBehaviours
                 context._chasingState.Target = player;
                 context.SetState(context._chasingState);
             }
-            // else if (TimeToWander()) current time is >= the amount of time to wait since last decided to wander
         }
 
         public override void OnDrawGizmos(ArtificialIntelligence context)
         {
             base.OnDrawGizmos(context);
+
+            var position = context.gameObject.transform.position;
+
+            // Draw aggro radius
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(context.gameObject.transform.position, _detectRange);
+            Gizmos.DrawWireSphere(position, _detectRange);
+
+            // Draw current wander interest
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawRay(position + Vector3.up, _wanderTarget - (position + Vector3.up));
+            Gizmos.DrawSphere(_wanderTarget, 0.25f);
         }
 
         private GameObject DetectPlayer(ArtificialIntelligence context)
@@ -99,8 +110,9 @@ namespace MonoBehaviours
 
     public class ChaseState : AiState
     {
+        private readonly float _chaseUpdateWaitInSeconds = 1.5f;
         private IEnumerator _chaseBehaviorCoroutine;
-        private readonly float _chaseUpdateWaitInSeconds = 2.0f;
+        private Vector3 _chaseTarget;
         public ChaseState(Material stateMaterial) : base(stateMaterial) {}
 
         // Promote up to abstract class? 🤔
@@ -119,13 +131,27 @@ namespace MonoBehaviours
         {
             // Is _target null? setstate(Idle)
             if (Target == null) context.SetState(context._idleState);
-            else if (TargetOutOfRange()) context.SetState(context._idleState);
-            else if (TargetWithinRange()) context.SetState(context._closeCombatState);
+            else if (TargetOutOfChaseRange()) context.SetState(context._idleState);
+            else if (TargetWithinCloseFollowRange()) context.SetState(context._closeFollowState);
         }
 
-        private bool TargetOutOfRange() => false;
+        public override void OnDrawGizmos(ArtificialIntelligence context)
+        {
+            base.OnDrawGizmos(context);
 
-        private bool TargetWithinRange() => false;
+            var position = context.gameObject.transform.position;
+            Gizmos.DrawRay(position + Vector3.up, _chaseTarget - (position + Vector3.up));
+        }
+
+        private bool TargetOutOfChaseRange() =>
+            // Get the length of a ray between target and self.
+            // Return if that length is greater than _closeFollowRange
+            false;
+
+        private bool TargetWithinCloseFollowRange() =>
+            // Get the length of a ray between target and self.
+            // Return if that length is greater than _closeFollowRange
+            false;
 
         private IEnumerator ChaseBehavior(ArtificialIntelligence context)
         {
@@ -133,7 +159,8 @@ namespace MonoBehaviours
             {
                 if (Target != null)
                 {
-                    context.UpdateDestination(Target.transform.position);
+                    _chaseTarget = Target.transform.position;
+                    context.UpdateDestination(_chaseTarget);
                 }
 
                 yield return new WaitForSeconds(_chaseUpdateWaitInSeconds);
@@ -141,9 +168,12 @@ namespace MonoBehaviours
         }
     }
 
-    public class CombatCloseState : AiState
+    public class CloseFollowState : AiState
     {
-        public CombatCloseState(Material stateMaterial) : base(stateMaterial) {}
+        private IEnumerable<Vector3> _avoids = new List<Vector3>();
+        private IEnumerable<Vector3> _interests = new List<Vector3>();
+        public CloseFollowState(Material stateMaterial) : base(stateMaterial) {}
+        public override void OnDrawGizmos(ArtificialIntelligence context) => base.OnDrawGizmos(context);
         public override void Update(ArtificialIntelligence context)
         {
             // Circle around player
@@ -164,10 +194,6 @@ namespace MonoBehaviours
     // FSM context
     public class ArtificialIntelligence : MonoBehaviour, AiStateContext
     {
-        public ChaseState _chasingState;
-        public CombatCloseState _closeCombatState;
-        public DeadState _deadState;
-        public IdleState _idleState;
 
         [SerializeField] private Material idleMaterial;
         [SerializeField] private Material chaseMaterial;
@@ -175,12 +201,16 @@ namespace MonoBehaviours
         [SerializeField] private Material deadMaterial;
 
         private BTBot _btBot;
+        public ChaseState _chasingState;
+        public CloseFollowState _closeFollowState;
+        public DeadState _deadState;
+        public IdleState _idleState;
         private void Start()
         {
             _btBot = GetComponent<BTBot>();
             _idleState = new IdleState(idleMaterial);
             _chasingState = new ChaseState(chaseMaterial);
-            _closeCombatState = new CombatCloseState(closeCombatMaterial);
+            _closeFollowState = new CloseFollowState(closeCombatMaterial);
             _deadState = new DeadState(deadMaterial);
             SetState(_idleState);
         }
