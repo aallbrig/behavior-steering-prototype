@@ -148,6 +148,7 @@ namespace MonoBehaviours
         {
             // Circle around player
             // Dot product between self and Target
+            // https://youtu.be/6BrZryMz-ac?t=170
         }
     }
 
