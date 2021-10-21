@@ -103,6 +103,7 @@ namespace MonoBehaviours
         private readonly float _chaseUpdateWaitInSeconds = 2.0f;
         public ChaseState(Material stateMaterial) : base(stateMaterial) {}
 
+        // Promote up to abstract class? 🤔
         public GameObject Target { get; set; }
 
         public override void Start(ArtificialIntelligence context)
@@ -146,6 +147,7 @@ namespace MonoBehaviours
         public override void Update(ArtificialIntelligence context)
         {
             // Circle around player
+            // Dot product between self and Target
         }
     }
 
