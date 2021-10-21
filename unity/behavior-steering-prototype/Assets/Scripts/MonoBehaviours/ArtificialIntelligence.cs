@@ -144,7 +144,12 @@ namespace MonoBehaviours
             // Is _target null? setstate(Idle)
             if (Target == null) context.SetState(context._idleState);
             else if (TargetOutOfChaseRange(context)) context.SetState(context._idleState);
-            else if (TargetWithinCloseFollowRange(context)) context.SetState(context._closeFollowState);
+            else if (TargetWithinCloseFollowRange(context))
+            {
+                context._closeFollowState.Target = Target;
+                context._closeFollowState.CloseFollowRange = _closeRange;
+                context.SetState(context._closeFollowState);
+            }
         }
 
         public override void OnDrawGizmos(ArtificialIntelligence context)
@@ -205,8 +210,16 @@ namespace MonoBehaviours
 
     public class CloseFollowState : AiState
     {
-        private IEnumerable<Vector3> _avoids = new List<Vector3>();
-        private IEnumerable<Vector3> _interests = new List<Vector3>();
+        private float _closeFollowBuffer = 2.0f;
+        public GameObject Target { get; set; }
+
+        private float _closeFollowRange;
+        public float CloseFollowRange
+        {
+            get => _closeFollowRange;
+            set => _closeFollowRange = Mathf.Clamp(_closeFollowBuffer + value, 0, 100);
+        }
+
         public CloseFollowState(Material stateMaterial) : base(stateMaterial) {}
         public override void OnDrawGizmos(ArtificialIntelligence context) => base.OnDrawGizmos(context);
         public override void Update(ArtificialIntelligence context)
@@ -214,6 +227,21 @@ namespace MonoBehaviours
             // Circle around player
             // Dot product between self and Target
             // https://youtu.be/6BrZryMz-ac?t=170
+            // Is _target null? setstate(Idle)
+            if (Target == null) context.SetState(context._idleState);
+            else if (TargetOutOfCloseFollowRange(context))
+            {
+                context._chasingState.Target = Target;
+                context.SetState(context._chasingState);
+            }
+        }
+        private bool TargetOutOfCloseFollowRange(ArtificialIntelligence context)
+        {
+            var offset = Target.transform.position - context.transform.position;
+            var squareLength = offset.sqrMagnitude;
+
+            // multiple _chaseRange to compare like terms
+            return squareLength > CloseFollowRange * CloseFollowRange;
         }
     }
 
