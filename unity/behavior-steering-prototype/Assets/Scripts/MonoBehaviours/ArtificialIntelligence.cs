@@ -46,12 +46,15 @@ namespace MonoBehaviours
 
         private IEnumerator IdleBehavior(ArtificialIntelligence context)
         {
-            var randomWanderDirection = Random.insideUnitCircle * _wanderRadius;
-            var destination = context.transform.position + new Vector3(randomWanderDirection.x, 0, randomWanderDirection.y);
+            while (true)
+            {
+                var randomWanderDirection = Random.insideUnitCircle * _wanderRadius;
+                var destination = context.transform.position + new Vector3(randomWanderDirection.x, 0, randomWanderDirection.y);
 
-            context.UpdateDestination(destination);
+                context.UpdateDestination(destination);
 
-            yield return new WaitForSeconds(_idleBehaviorInSeconds);
+                yield return new WaitForSeconds(_idleBehaviorInSeconds);
+            }
         }
 
         public override void Stop(ArtificialIntelligence context)
@@ -125,11 +128,15 @@ namespace MonoBehaviours
 
         private IEnumerator ChaseBehavior(ArtificialIntelligence context)
         {
-            if (Target == null) yield break;
+            while (true)
+            {
+                if (Target != null)
+                {
+                    context.UpdateDestination(Target.transform.position);
+                }
 
-            context.UpdateDestination(Target.transform.position);
-
-            yield return new WaitForSeconds(_chaseUpdateWaitInSeconds);
+                yield return new WaitForSeconds(_chaseUpdateWaitInSeconds);
+            }
         }
     }
 
